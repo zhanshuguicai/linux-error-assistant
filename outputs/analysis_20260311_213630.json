@@ -1,0 +1,44 @@
+{
+  "mode": "规则报错分析",
+  "recognized": true,
+  "input_text": "Permission denied",
+  "error_type": "权限不足",
+  "explanation": "当前操作没有足够权限执行，系统拒绝了这次请求。",
+  "possible_causes": [
+    "当前用户权限不足",
+    "文件没有执行权限",
+    "文件或目录权限位设置不正确",
+    "文件属主不是当前用户"
+  ],
+  "step_by_step": [
+    {
+      "step": "先查看目标文件或目录的权限信息",
+      "command": "ls -l 文件名",
+      "purpose": "确认权限位、属主和属组信息。",
+      "look_for": "重点看最前面的权限位，例如是否有 x；还要看属主是不是你当前用户。",
+      "next_action": "如果没有 x，可以继续给它增加执行权限。"
+    },
+    {
+      "step": "如果文件没有执行权限，给它增加执行权限",
+      "command": "chmod +x 文件名",
+      "purpose": "让脚本或程序文件具备执行权限。",
+      "look_for": "执行后再次运行 ls -l 文件名，确认权限位里出现 x。",
+      "next_action": "如果权限已正确但仍失败，继续检查用户权限。"
+    },
+    {
+      "step": "查看当前用户是谁",
+      "command": "whoami",
+      "purpose": "确认当前执行命令的用户身份。",
+      "look_for": "看当前用户是否应该有权限访问该文件或目录。",
+      "next_action": "如果当前用户权限不足，可以尝试 sudo。"
+    },
+    {
+      "step": "尝试使用管理员权限执行",
+      "command": "sudo 你的命令",
+      "purpose": "确认问题是否由用户权限不足引起。",
+      "look_for": "如果 sudo 后命令可以执行，说明原问题大概率是权限不足。",
+      "next_action": "如果 sudo 也失败，需要进一步检查文件属主和目录权限。"
+    }
+  ],
+  "matched_keyword": "permission denied"
+}

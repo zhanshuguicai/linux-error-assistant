@@ -1,0 +1,19 @@
+{
+  "mode": "规则报错分析",
+  "recognized": true,
+  "input_text": "Permission denied",
+  "error_type": "权限不足",
+  "explanation": "当前操作没有足够权限执行，系统拒绝了这次请求。",
+  "possible_causes": [
+    "当前用户权限不足",
+    "文件没有执行权限",
+    "目标文件或目录的属主、权限设置不正确"
+  ],
+  "suggestions": [
+    "检查当前用户是否有访问权限",
+    "使用 ls -l 查看文件权限",
+    "必要时使用 chmod 修改权限",
+    "必要时使用 sudo 提升权限"
+  ],
+  "matched_keyword": "permission denied"
+}

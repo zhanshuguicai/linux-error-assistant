@@ -23,7 +23,7 @@ def analyze_by_rules(error_text):
                     "error_type": rule["error_type"],
                     "explanation": rule["explanation"],
                     "possible_causes": rule["possible_causes"],
-                    "suggestions": rule["suggestions"],
+                    "step_by_step": rule["step_by_step"],
                     "matched_keyword": keyword
                 }
 
@@ -34,13 +34,32 @@ def analyze_by_rules(error_text):
         "error_type": "未识别错误",
         "explanation": "当前规则库没有识别出该报错。",
         "possible_causes": [
-            "当前报错不在第一版规则覆盖范围内",
-            "报错文本过短或信息不足"
+            "当前报错不在规则覆盖范围内",
+            "报错文本过短或信息不足",
+            "报错信息过于依赖上下文"
         ],
-        "suggestions": [
-            "补充更完整的报错信息",
-            "查看原始日志上下文",
-            "尝试使用 AI 分析模式"
+        "step_by_step": [
+            {
+                "step": "先保留完整报错原文，不要只截取其中一小段",
+                "command": "（无固定命令）",
+                "purpose": "保证后续分析时信息足够完整。",
+                "look_for": "尽量保留报错前后几行上下文。",
+                "next_action": "如果你能补充上下文，再重新分析。"
+            },
+            {
+                "step": "查看原始日志或命令输出的上下文",
+                "command": "tail -n 50 日志文件名",
+                "purpose": "查看错误前后发生了什么。",
+                "look_for": "重点看报错前后几行是否有更具体的异常信息。",
+                "next_action": "如果找到更具体关键词，再把完整内容输入工具或使用 AI 分析。"
+            },
+            {
+                "step": "尝试使用 AI 分析模式",
+                "command": "在本工具中选择 4. AI 分析",
+                "purpose": "让模型基于更灵活的理解方式分析未知报错。",
+                "look_for": "观察 AI 是否给出更具体的排查命令和顺序。",
+                "next_action": "如果 AI 仍然无法判断，说明原始信息可能还不够。"
+            }
         ],
         "matched_keyword": ""
     }
@@ -52,7 +71,7 @@ def explain_command(command_text):
     for rule in COMMAND_RULES:
         for keyword in rule["keywords"]:
             if keyword in text_lower:
-                return {
+                    return {
                     "mode": "命令解释",
                     "recognized": True,
                     "input_text": command_text,
@@ -61,6 +80,7 @@ def explain_command(command_text):
                     "common_options": rule["common_options"],
                     "usage_scenarios": rule["usage_scenarios"],
                     "tips": rule["tips"],
+                    "beginner_steps": rule.get("beginner_steps", []),
                     "matched_keyword": keyword
                 }
 
@@ -87,13 +107,14 @@ def find_commands_by_scenario(scenario_text):
     for rule in SCENARIO_RULES:
         for keyword in rule["keywords"]:
             if keyword in text_lower:
-                return {
+                    return {
                     "mode": "场景命令检索",
                     "recognized": True,
                     "input_text": scenario_text,
                     "scenario": rule["scenario"],
                     "recommended_commands": rule["recommended_commands"],
                     "explanation": rule["explanation"],
+                    "step_by_step": rule.get("step_by_step", []),
                     "matched_keyword": keyword
                 }
 
@@ -119,10 +140,15 @@ def print_error_result(result):
     for i, cause in enumerate(result["possible_causes"], start=1):
         print(f"{i}. {cause}")
 
-    print("\n排查建议：")
-    for i, suggestion in enumerate(result["suggestions"], start=1):
-        print(f"{i}. {suggestion}")
-
+    if "step_by_step" in result and result["step_by_step"]:
+        print("\n手把手排查步骤：")
+        for i, item in enumerate(result["step_by_step"], start=1):
+            print(f"\n步骤{i}：{item['step']}")
+            print(f"命令：{item['command']}")
+            print(f"说明：{item['purpose']}")
+            print(f"你应该观察：{item['look_for']}")
+            if item.get("next_action"):
+                print(f"下一步判断：{item['next_action']}")
 
 def print_command_result(result):
     print("\n========== 命令解释 ==========")
@@ -144,6 +170,15 @@ def print_command_result(result):
     for i, tip in enumerate(result["tips"], start=1):
         print(f"{i}. {tip}")
 
+    if "beginner_steps" in result and result["beginner_steps"]:
+        print("\n新手上手步骤：")
+        for i, item in enumerate(result["beginner_steps"], start=1):
+            print(f"\n步骤{i}：{item['step']}")
+            print(f"命令：{item['command']}")
+            print(f"说明：{item['purpose']}")
+            print(f"你应该观察：{item['look_for']}")
+            if item.get("next_action"):
+                print(f"下一步判断：{item['next_action']}")
 
 def print_scenario_result(result):
     print("\n========== 场景命令检索 ==========")
@@ -156,6 +191,15 @@ def print_scenario_result(result):
         for i, cmd in enumerate(result["recommended_commands"], start=1):
             print(f"{i}. {cmd}")
 
+    if "step_by_step" in result and result["step_by_step"]:
+        print("\n推荐操作顺序：")
+        for i, item in enumerate(result["step_by_step"], start=1):
+            print(f"\n步骤{i}：{item['step']}")
+            print(f"命令：{item['command']}")
+            print(f"说明：{item['purpose']}")
+            print(f"你应该观察：{item['look_for']}")
+            if item.get("next_action"):
+                print(f"下一步判断：{item['next_action']}")
 
 def print_ai_result(input_text, ai_content):
     print("\n========== AI 分析结果 ==========")
