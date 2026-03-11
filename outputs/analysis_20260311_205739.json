@@ -1,0 +1,19 @@
+{
+  "mode": "规则分析",
+  "recognized": true,
+  "input_error": "HTTPSConnectionPool(host='www.python.org', port=443): Read timed out. (read timeout=5)",
+  "error_type": "请求超时",
+  "explanation": "请求在规定时间内没有收到完整响应，因此被系统中断。",
+  "possible_causes": [
+    "网络连接较慢",
+    "目标服务响应过慢",
+    "设置的 timeout 时间过短"
+  ],
+  "suggestions": [
+    "检查当前网络连接情况",
+    "适当增大 timeout 参数",
+    "确认目标服务是否正常运行",
+    "使用 curl 测试目标地址的响应情况"
+  ],
+  "matched_keyword": "read timed out"
+}
